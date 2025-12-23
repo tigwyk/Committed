@@ -97,6 +97,16 @@ chmod +x committed.py
 ./committed.py
 ```
 
+### Try the Demo
+
+Want to see the game in action without setting up GitLab credentials? Run the demo script:
+
+```bash
+python demo.py
+```
+
+The demo simulates GitLab activity (commits and merge request approvals) to showcase the game mechanics, character progression, combat system, and item collection.
+
 ## 🎯 How to Play
 
 1. **Start the game**: Run `python committed.py`
@@ -147,6 +157,7 @@ If you don't have GitLab credentials configured, you can still explore the game 
 ```
 Committed/
 ├── committed.py       # Main game application (CLI)
+├── demo.py           # Demo script with simulated GitLab activity
 ├── game.py           # Game mechanics (Character, Mob, Item classes)
 ├── game_state.py     # Save/load functionality
 ├── gitlab_client.py  # GitLab API integration
