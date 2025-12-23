@@ -57,18 +57,36 @@ class GitLabClient:
             return []
         
         try:
-            params = {
-                'action': 'pushed',
-                'after': since
-            } if since else {'action': 'pushed'}
-            
-            response = requests.get(
-                f"{self.url}/api/v4/users/{user_id}/events",
-                headers=self.headers,
-                params=params
-            )
-            response.raise_for_status()
-            events = response.json()
+            # Base parameters for the events API call
+            base_params = {'action': 'pushed'}
+            if since:
+                base_params['after'] = since
+
+            # Fetch all pages of events to avoid missing commits due to pagination
+            events: List[Dict] = []
+            page = 1
+            while True:
+                params = dict(base_params)
+                params['page'] = page
+
+                response = requests.get(
+                    f"{self.url}/api/v4/users/{user_id}/events",
+                    headers=self.headers,
+                    params=params
+                )
+                response.raise_for_status()
+                page_events = response.json()
+                if not page_events:
+                    break
+                events.extend(page_events)
+
+                next_page = response.headers.get('X-Next-Page')
+                if not next_page:
+                    break
+                try:
+                    page = int(next_page)
+                except (TypeError, ValueError):
+                    page += 1
             
             # Filter for push events and extract commit info
             commits = []
