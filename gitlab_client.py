@@ -33,9 +33,9 @@ class GitLabClient:
         Raises:
             ValueError: If token or username is empty
         """
-        if not token or not token.strip():
+        if not token:
             raise ValueError("GitLab token cannot be empty")
-        if not username or not username.strip():
+        if not username:
             raise ValueError("GitLab username cannot be empty")
             
         self.url = url.rstrip('/')
@@ -204,6 +204,10 @@ class GitLabClient:
             This method makes N+1 API requests (1 for projects list + 1 for
             each project's languages). For users with many projects, consider
             the rate limiting implications.
+            
+            Only the first 10 projects are analyzed to limit API calls and
+            avoid rate limiting. This should provide a reasonable approximation
+            of the user's primary language.
         """
         user_id = self.get_user_id()
         if not user_id:

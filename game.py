@@ -297,7 +297,7 @@ def render_hp_bar(current_hp: int, max_hp: int, bar_length: int = 20) -> str:
     Returns:
         String representation of HP bar with filled and empty blocks
     """
-    safe_max_hp = max_hp if max_hp > 0 else 1
+    safe_max_hp = max(max_hp, 1)
     hp_percentage = current_hp / safe_max_hp
     filled = int(bar_length * hp_percentage)
     return "█" * filled + "░" * (bar_length - filled)
