@@ -6,7 +6,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from gitlab_client import GitLabClient
-from game import Character, Item
+from game import Character, render_hp_bar
 from game_state import GameState
 
 
@@ -32,10 +32,7 @@ def display_current_mob(character: Character):
     """Display current mob status."""
     if character.current_mob:
         mob = character.current_mob
-        hp_bar_length = 20
-        hp_percentage = mob.hp / mob.max_hp
-        filled = int(hp_bar_length * hp_percentage)
-        bar = "█" * filled + "░" * (hp_bar_length - filled)
+        bar = render_hp_bar(mob.hp, mob.max_hp)
         
         print("\n⚔️  CURRENT ENEMY:")
         print(f"   {mob.name} (Level {mob.level})")
@@ -71,55 +68,60 @@ def sync_with_gitlab(client: GitLabClient, character: Character, last_sync: str 
     """Sync with GitLab and process activities."""
     print("\n🔄 Syncing with GitLab...")
     
-    # Get language stats and determine class/race if not set
-    if character.character_class == "Commoner":
-        print("   Analyzing your coding style...")
-        language_stats = client.get_language_stats()
-        if language_stats:
-            character.determine_class_race(language_stats)
-            print(f"   ✨ Your class has been determined: {character.race} {character.character_class}")
-    
-    # Process commits (damage to mobs)
-    commits = client.get_recent_commits(since=last_sync)
-    total_commits = sum(c.get('commit_count', 1) for c in commits)
-    
-    if total_commits > 0:
-        print(f"\n   📝 Found {total_commits} new commit(s)!")
-        character.stats['total_commits'] += total_commits
+    try:
+        # Get language stats and determine class/race if not set
+        if character.character_class == "Commoner":
+            print("   Analyzing your coding style...")
+            language_stats = client.get_language_stats()
+            if language_stats:
+                character.determine_class_race(language_stats)
+                print(f"   ✨ Your class has been determined: {character.race} {character.character_class}")
         
-        # Each commit does damage
-        for commit in commits:
-            commit_count = commit.get('commit_count', 1)
-            for _ in range(commit_count):
-                damage = 10 + (character.level * 2)
-                
-                if not character.current_mob:
-                    character.spawn_mob()
-                    print(f"\n   🐉 A wild {character.current_mob.name} appears!")
-                
-                # Store the current mob name before attacking
-                current_mob_name = character.current_mob.name
-                
-                item = character.attack_mob(damage)
-                
-                if item:
-                    print(f"   💥 You dealt {damage} damage and defeated the {current_mob_name}!")
-                    print(f"   🎁 Item dropped: {item.name}")
-                else:
-                    print(f"   ⚔️  You dealt {damage} damage to the {character.current_mob.name}!")
-    
-    # Process merge request approvals (special items)
-    approvals = client.get_approved_merge_requests(since=last_sync)
-    
-    if approvals:
-        print(f"\n   ✅ Found {len(approvals)} approved merge request(s)!")
+        # Process commits (damage to mobs)
+        commits = client.get_recent_commits(since=last_sync)
+        total_commits = sum(c.get('commit_count', 1) for c in commits)
         
-        for approval in approvals:
-            item = character.add_special_item(approval.get('target_title', 'Unknown MR'))
-            print(f"   🌟 Special item obtained: {item.name} (Power: {item.power})")
+        if total_commits > 0:
+            print(f"\n   📝 Found {total_commits} new commit(s)!")
+            character.stats['total_commits'] += total_commits
+            
+            # Each commit does damage
+            for commit in commits:
+                commit_count = commit.get('commit_count', 1)
+                for _ in range(commit_count):
+                    damage = 10 + (character.level * 2)
+                    
+                    if not character.current_mob:
+                        character.spawn_mob()
+                        print(f"\n   🐉 A wild {character.current_mob.name} appears!")
+                    
+                    # Store the current mob name before attacking
+                    current_mob_name = character.current_mob.name
+                    
+                    item = character.attack_mob(damage)
+                    
+                    if item:
+                        print(f"   💥 You dealt {damage} damage and defeated the {current_mob_name}!")
+                        print(f"   🎁 Item dropped: {item.name}")
+                    else:
+                        print(f"   ⚔️  You dealt {damage} damage to the {character.current_mob.name}!")
+        
+        # Process merge request approvals (special items)
+        approvals = client.get_approved_merge_requests(since=last_sync)
+        
+        if approvals:
+            print(f"\n   ✅ Found {len(approvals)} approved merge request(s)!")
+            
+            for approval in approvals:
+                item = character.add_special_item(approval.get('target_title', 'Unknown MR'))
+                print(f"   🌟 Special item obtained: {item.name} (Power: {item.power})")
+        
+        if total_commits == 0 and not approvals:
+            print("   No new activity found.")
     
-    if total_commits == 0 and not approvals:
-        print("   No new activity found.")
+    except Exception as e:
+        print(f"\n   ❌ Error syncing with GitLab: {e}")
+        print("   Please check your credentials and network connection.")
     
     print("\n✓ Sync complete!")
 
@@ -150,7 +152,14 @@ def main():
         
         client = None
     else:
-        client = GitLabClient(gitlab_url, gitlab_token, gitlab_username)
+        try:
+            client = GitLabClient(gitlab_url, gitlab_token, gitlab_username)
+        except ValueError as e:
+            print(f"⚠️  Invalid GitLab credentials: {e}")
+            print("\nPlease check your .env file and ensure:")
+            print("- GITLAB_TOKEN is not empty")
+            print("- GITLAB_USERNAME is not empty")
+            return
     
     # Load or create game state
     game_state = GameState()

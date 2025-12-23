@@ -99,7 +99,7 @@ class Character:
     
     def xp_for_next_level(self) -> int:
         """Calculate XP needed for next level."""
-        return 100 * (self.level ** 1.5)
+        return int(100 * (self.level ** 1.5))
     
     def add_xp(self, amount: int):
         """Add XP and handle level ups."""
@@ -283,3 +283,21 @@ class Character:
             char.current_mob = Mob(**mob_data)
         
         return char
+
+
+def render_hp_bar(current_hp: int, max_hp: int, bar_length: int = 20) -> str:
+    """
+    Render an HP bar for display.
+    
+    Args:
+        current_hp: Current HP value
+        max_hp: Maximum HP value
+        bar_length: Length of the bar in characters (default: 20)
+        
+    Returns:
+        String representation of HP bar with filled and empty blocks
+    """
+    safe_max_hp = max_hp if max_hp > 0 else 1
+    hp_percentage = current_hp / safe_max_hp
+    filled = int(bar_length * hp_percentage)
+    return "█" * filled + "░" * (bar_length - filled)

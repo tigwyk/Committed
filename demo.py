@@ -3,7 +3,7 @@
 Demo script to test game mechanics with simulated GitLab activity.
 This can be used to demonstrate the game without actual GitLab credentials.
 """
-from game import Character
+from game import Character, render_hp_bar
 from game_state import GameState
 
 
@@ -20,8 +20,6 @@ def simulate_commits(character, num_commits):
         
         # Store the current mob name before attacking
         current_mob_name = character.current_mob.name
-        current_mob_hp = character.current_mob.hp
-        current_mob_max_hp = character.current_mob.max_hp
         
         item = character.attack_mob(damage)
         character.stats['total_commits'] += 1
@@ -118,10 +116,7 @@ def main():
     if character.current_mob:
         print("\n⚔️  CURRENT ENEMY:")
         mob = character.current_mob
-        hp_bar_length = 20
-        hp_percentage = mob.hp / mob.max_hp
-        filled = int(hp_bar_length * hp_percentage)
-        bar = "█" * filled + "░" * (hp_bar_length - filled)
+        bar = render_hp_bar(mob.hp, mob.max_hp)
         print(f"   {mob.name} (Level {mob.level})")
         print(f"   HP: [{bar}] {mob.hp}/{mob.max_hp}")
     
