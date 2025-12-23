@@ -4,7 +4,6 @@ GitLab API Client for fetching user activity data.
 import os
 import requests
 from typing import Dict, List, Optional
-from datetime import datetime
 
 
 class GitLabClient:
