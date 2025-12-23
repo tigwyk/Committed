@@ -170,7 +170,6 @@ class Character:
                 self.add_item(item)
             
             # Spawn new mob
-            old_mob_name = self.current_mob.name
             self.spawn_mob()
             
             return item

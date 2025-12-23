@@ -97,10 +97,13 @@ def sync_with_gitlab(client: GitLabClient, character: Character, last_sync: str 
                     character.spawn_mob()
                     print(f"\n   🐉 A wild {character.current_mob.name} appears!")
                 
+                # Store the current mob name before attacking
+                current_mob_name = character.current_mob.name
+                
                 item = character.attack_mob(damage)
                 
                 if item:
-                    print(f"   💥 You dealt {damage} damage and defeated the {character.current_mob.name}!")
+                    print(f"   💥 You dealt {damage} damage and defeated the {current_mob_name}!")
                     print(f"   🎁 Item dropped: {item.name}")
                 else:
                     print(f"   ⚔️  You dealt {damage} damage to the {character.current_mob.name}!")
