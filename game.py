@@ -111,7 +111,8 @@ class Character:
     
     def level_up(self):
         """Level up the character."""
-        self.xp -= int(self.xp_for_next_level())
+        xp_needed = int(self.xp_for_next_level())
+        self.xp -= xp_needed
         self.level += 1
         
         # Increase max HP

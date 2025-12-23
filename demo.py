@@ -19,11 +19,16 @@ def simulate_commits(character, num_commits):
             character.spawn_mob()
             print(f"   🐉 A wild {character.current_mob.name} appears!")
         
+        # Store the current mob name before attacking
+        current_mob_name = character.current_mob.name
+        current_mob_hp = character.current_mob.hp
+        current_mob_max_hp = character.current_mob.max_hp
+        
         item = character.attack_mob(damage)
         character.stats['total_commits'] += 1
         
         if item:
-            print(f"   💥 You dealt {damage} damage and defeated the {character.current_mob.name}!")
+            print(f"   💥 You dealt {damage} damage and defeated the {current_mob_name}!")
             print(f"   🎁 Item dropped: {item.name}")
         else:
             print(f"   ⚔️  You dealt {damage} damage! ({character.current_mob.name} HP: {character.current_mob.hp}/{character.current_mob.max_hp})")
