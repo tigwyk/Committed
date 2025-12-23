@@ -42,13 +42,13 @@ class GameState:
         try:
             data = {
                 'character': self.character.to_dict(),
-                'last_sync': datetime.now().isoformat()
+                # Persist the existing last_sync value; do not update it on save.
+                'last_sync': self.last_sync
             }
             
             with open(self.save_file, 'w') as f:
                 json.dump(data, f, indent=2)
             
-            self.last_sync = data['last_sync']
             print("✓ Game saved")
         except Exception as e:
             print(f"Error saving game state: {e}")
