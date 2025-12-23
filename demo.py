@@ -3,7 +3,7 @@
 Demo script to test game mechanics with simulated GitLab activity.
 This can be used to demonstrate the game without actual GitLab credentials.
 """
-from game import Character, Item
+from game import Character
 from game_state import GameState
 
 
